@@ -32,6 +32,8 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
   const [publishing,setPublishing] = useState(false);
   const source = useRef('');
   const tokenField = useRef<HTMLInputElement>(null);
+  const sessionKey = useRef('');
+  const [connected,setConnected] = useState(false);
   const [query,setQuery] = useState('');
   const [draft,setDraft] = useState<typeof empty|null>(null);
   const [preview,setPreview] = useState(false);
@@ -121,15 +123,17 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
   const output = JSON.stringify(catalog,null,2)+'\n';
   async function publish(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!dirty || publishing || !tokenField.current) return;
+    if (!dirty || publishing) return;
     const input = tokenField.current;
-    const token = input.value.trim();
-    input.value='';
+    const token = sessionKey.current || input?.value.trim() || '';
+    if (input) input.value='';
     setPublishing(true);
     setStatus('در حال ثبت محتوا در GitHub…');
     try {
       await publishCatalog(token,source.current,output);
       source.current=output;
+      sessionKey.current=token;
+      setConnected(true);
       setDirty(false);
       setView('content');
       setStatus('در GitHub ثبت شد. نسخهٔ عمومی پس از پایان ساخت خودکار به‌روز می‌شود.');
@@ -240,15 +244,16 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
         {dirty&&<section className="public-admin-publish">
           <h2>نشر در GitHub</h2>
           <form onSubmit={publish}>
-            <label>کلید نشر GitHub<input ref={tokenField} type="password" required dir="ltr" autoComplete="off" spellCheck={false} disabled={publishing}/></label>
+            {!connected&&<label>کلید نشر GitHub<input ref={tokenField} type="password" required dir="ltr" autoComplete="off" spellCheck={false} disabled={publishing}/></label>}
             <div className="public-admin-actions">
               <button type="submit" className="button dark" disabled={publishing}>{publishing?'در حال نشر…':'نشر در سایت'}</button>
               <button type="button" className="button light" onClick={downloadBackup}>دریافت پشتیبان</button>
+              {connected&&<button type="button" className="button light" disabled={publishing} onClick={()=>{sessionKey.current='';setConnected(false)}}>پاک‌کردن کلید از این صفحه</button>}
             </div>
           </form>
           <details>
             <summary>ساخت کلید نشر</summary>
-            <p>برای مخزن Physics-department یک کلید محدود با اجازهٔ <bdi>Contents: Read and write</bdi> بسازید. کلید فقط برای درخواست نشر به GitHub استفاده می‌شود.</p>
+            <p>برای مخزن Physics-department یک کلید محدود با اجازهٔ <bdi>Contents: Read and write</bdi> بسازید. کلید فقط تا وقتی این صفحه باز است در حافظه می‌ماند و برای نشر به GitHub فرستاده می‌شود.</p>
             <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">ساخت کلید در GitHub ↗</a>
           </details>
         </section>}
