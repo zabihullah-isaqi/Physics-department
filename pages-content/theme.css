@@ -77,6 +77,34 @@ html[data-theme="dark"] :is(.button.light, input, select, textarea) {
 html[data-theme="dark"] .academy-header .public-theme-toggle { color: var(--gold); }
 .public-theme-toggle:focus-visible { outline: 2px solid var(--academy-blue); outline-offset: 3px; }
 
+.public-languages {
+  display: inline-flex;
+  align-items: center;
+  gap: .15rem;
+  padding: .15rem;
+  border: 1px solid var(--line);
+  border-radius: .65rem;
+}
+
+.public-languages button {
+  min-height: 2.25rem;
+  border: 0;
+  border-radius: .45rem;
+  padding-inline: clamp(.3rem, 1vw, .65rem);
+  background: transparent;
+  color: var(--ink);
+  font-size: .82rem;
+  white-space: nowrap;
+}
+
+.public-languages button[aria-pressed="true"] {
+  background: var(--academy-soft);
+  color: var(--academy-blue);
+  font-weight: 800;
+}
+
+.public-languages button:focus-visible { outline: 2px solid var(--academy-blue); outline-offset: 1px; }
+
 .home-metrics {
   background: var(--academy-cream);
   color: var(--ink);
@@ -151,7 +179,15 @@ html[data-theme="dark"] .home-metric-grid dd { color: #8bd7c5; }
 .public-admin-list { margin: 0; padding: 0; list-style: none; }
 .public-admin-list li { border-top: 1px solid var(--line); padding-block: .65rem; }
 .public-admin-draft { display: grid; gap: .5rem; justify-items: start; background: var(--academy-soft); padding: 1rem; margin-block: .9rem; border-radius: .55rem; }
-.public-admin-preview-text { white-space: pre-wrap; }
+.public-admin-preview { display: block; }
+.public-admin-preview .content-blocks { margin-block: 1rem; }
+.public-admin .blocks-editor { min-width: 0; }
+.public-admin .rich-editor { min-width: 0; }
+html[data-theme="dark"] .public-admin :is(.rich-editor, .rich-input, .rich-toolbar, .block-editor-card, .add-block-panel) {
+  background: var(--night-panel);
+  color: var(--ink);
+  border-color: var(--line);
+}
 .public-admin fieldset { min-width: 0; display: grid; gap: .6rem; border: 1px solid var(--line); border-radius: .5rem; }
 .public-admin form, .public-admin label { display: grid; gap: .5rem; }
 .public-admin form { gap: 1rem; }

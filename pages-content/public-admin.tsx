@@ -1,8 +1,11 @@
 import {useEffect, useState, type FormEvent} from 'react';
 import {publicPageHref} from '../app/public-path';
 import {BookOpen, FileText, Globe, Pencil, Plus, Search} from 'lucide-react';
-import {RichView} from '../app/rich-text';
-import {RICH_PREFIX} from '../app/rich-text-model';
+import {RichTextEditor} from '../app/rich-text';
+import {normalizeRich} from '../app/rich-text-model';
+import {BlocksEditor, BlocksView} from '../app/content-blocks';
+import {normalizeBlocks,type ContentBlock} from '../app/content-blocks-model';
+import {Text} from '../app/portal';
 
 const editUrl = 'https://github.com/zabihullah-isaqi/Physics-department/edit/main/pages-content/content.json';
 const sourceUrl = 'https://raw.githubusercontent.com/zabihullah-isaqi/Physics-department/main/pages-content/content.json';
@@ -13,7 +16,7 @@ type Item = {
   parent_id: string | null; category: string; status: 'published'; meta: string;
 };
 type Catalog = {content: Item[]; [key: string]: unknown};
-const empty = {id:'',type:'course' as Kind,title:'',summary:'',body:'',parent:'',category:'',video:'',file:''};
+const empty = {id:'',type:'course' as Kind,title:'',summary:'',body:'',parent:'',category:'',video:'',file:'',blocks:[] as ContentBlock[]};
 const parentKind: Partial<Record<Kind, Kind>> = {chapter:'course',lesson:'chapter'};
 const draftKey = 'isaqi-public-content-draft';
 
@@ -30,7 +33,9 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(draftKey)||'null');
-      if (saved && Object.hasOwn(kinds,saved.type) && typeof saved.title==='string') setDraft({...empty,...saved});
+      if (saved && Object.hasOwn(kinds,saved.type) && typeof saved.title==='string') {
+        setDraft({...empty,...saved,blocks:Array.isArray(saved.blocks)?saved.blocks:[]});
+      }
     } catch {}
     const controller = new AbortController();
     fetch(sourceUrl,{cache:'no-store',signal:controller.signal}).then(async response => {
@@ -62,7 +67,7 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
   }
   function edit(item:Item) {
     const meta = JSON.parse(item.meta || '{}');
-    openEditor({id:item.id,type:item.type,title:item.title,summary:item.summary,body:item.body,parent:item.parent_id||'',category:item.category,video:meta.video||'',file:meta.file||''});
+    openEditor({id:item.id,type:item.type,title:item.title,summary:item.summary,body:item.body,parent:item.parent_id||'',category:item.category,video:meta.video||'',file:meta.file||'',blocks:Array.isArray(meta.blocks)?meta.blocks:[]});
     setStatus('');
   }
   function save(event:FormEvent) {
@@ -76,11 +81,22 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
       return;
     }
     const meta = JSON.parse(existing?.meta || '{}');
+    let body: string;
+    try {
+      body = normalizeRich(form.body);
+      meta.blocks = normalizeBlocks(form.blocks);
+      if (meta.blocks.some((block:ContentBlock)=>block.url.startsWith('/api/files/'))) {
+        throw new Error('برای بخش‌های درس، از پیوند HTTPS فایل بیرون از سایت استفاده کنید.');
+      }
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'متن یا بخش‌های درس معتبر نیست.');
+      return;
+    }
     meta.video = form.video.trim();
     meta.file = form.file.trim();
     const item: Item = {
       id: existing?.id || crypto.randomUUID(), type: form.type, title: form.title.trim(),
-      summary: form.summary.trim(), body: form.body, parent_id: expected ? form.parent : null,
+      summary: form.summary.trim(), body, parent_id: expected ? form.parent : null,
       category: form.category.trim(), status:'published', meta:JSON.stringify(meta),
     };
     const content = existing ? catalog.content.map(row => row.id===item.id ? item : row) : [...catalog.content,item];
@@ -141,7 +157,8 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
           <label>عنوان<input id="content-title" required maxLength={200} value={form.title} onChange={e=>field('title',e.target.value)}/></label>
           <label>معرفی کوتاه<input maxLength={1000} value={form.summary} onChange={e=>field('summary',e.target.value)}/></label>
           <label>دسته‌بندی<input maxLength={100} value={form.category} onChange={e=>field('category',e.target.value)}/></label>
-          <label>متن اصلی<textarea rows={8} value={form.body} onChange={e=>field('body',e.target.value)}/></label>
+          <RichTextEditor key={form.id||'new'} label="متن اصلی" value={form.body} onChange={value=>field('body',value)}/>
+          <BlocksEditor value={form.blocks} onChange={value=>field('blocks',value)} files={[]} notify={setStatus} externalOnly/>
           <fieldset id="content-media"><legend>فایل‌ها و ویدیو</legend>
           <label>پیوند ویدیو (YouTube)<input type="url" dir="ltr" pattern="https://.+" value={form.video} onChange={e=>field('video',e.target.value)}/></label>
           <label>پیوند جزوه یا اسلاید (Google Drive)<input type="url" dir="ltr" pattern="https://.+" value={form.file} onChange={e=>field('file',e.target.value)}/></label>
@@ -151,11 +168,16 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
             <button type="button" className="button light" aria-expanded={preview} onClick={()=>setPreview(!preview)}>{preview?'بستن پیش‌نمایش':'پیش‌نمایش'}</button>
           </div>
         </form>
-        {preview&&<article className="public-admin-draft">
+        {preview&&<article className="public-admin-draft public-admin-preview">
           <strong>پیش‌نمایش متن</strong>
           <h3>{form.title||'بدون عنوان'}</h3>
           {form.summary&&<p>{form.summary}</p>}
-          {form.body.startsWith(RICH_PREFIX)?<RichView value={form.body}/>:<div className="public-admin-preview-text">{form.body}</div>}
+          {form.body&&<Text value={form.body}/>}
+          <BlocksView blocks={form.blocks} renderText={value=><Text value={value}/>}/>
+          <BlocksView blocks={[
+            {id:'preview-video',type:'video',url:form.video,title:'ویدیوی درس',text:'',caption:'',alt:''},
+            {id:'preview-file',type:'file',url:form.file,title:'جزوه یا اسلاید',text:'',caption:'',alt:''},
+          ].filter(block=>block.url) as ContentBlock[]} renderText={value=><Text value={value}/>}/>
         </article>}
       </section>
       <section className="panel">
