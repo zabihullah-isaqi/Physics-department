@@ -6,10 +6,11 @@ import react from '@vitejs/plugin-react';
 
 const project = fileURLToPath(new URL('../', import.meta.url));
 const root = join(project, 'pages-content');
-const outDir = join(project, 'dist', 'github-pages');
+const pilot = process.argv.includes('--cms-pilot');
+const outDir = join(project, 'dist', pilot ? 'cms-pilot' : 'github-pages');
 const renderDir = join(project, 'dist', 'github-pages-render');
 const base = '/Physics-department/';
-const settings = {root, base, configFile: false, plugins: [react()]};
+const settings = {root, base, mode: pilot ? 'cms-pilot' : 'production', configFile: false, plugins: [react()]};
 
 await build({...settings, publicDir: join(project, 'public'), build: {outDir, emptyOutDir: true}});
 await build({
@@ -18,9 +19,8 @@ await build({
   build: {ssr: join(root, 'render.tsx'), target: 'node22', outDir: renderDir, emptyOutDir: true},
 });
 
-const {render} = await import(pathToFileURL(join(renderDir, 'render.js')).href);
+const {render,publicCatalog:data} = await import(pathToFileURL(join(renderDir, 'render.js')).href);
 const template = await readFile(join(outDir, 'index.html'), 'utf8');
-const data = JSON.parse(await readFile(join(root, 'content.json'), 'utf8'));
 const routes = new Set(['/', '/about', '/courses', '/labs', '/articles', '/research', '/resources', '/support', '/contact', '/privacy']);
 const sections = {course: 'courses', chapter: 'courses', lesson: 'courses', lab: 'labs', article: 'articles', research: 'research', resource: 'resources'};
 for (const item of data.content) {

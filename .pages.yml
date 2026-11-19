@@ -1,0 +1,65 @@
+content:
+  - name: courses
+    label: درس‌ها
+    type: collection
+    path: pages-content/cms/courses
+    format: json
+    filename: "{id}.json"
+    view:
+      primary: title
+      search: [title]
+    fields:
+      - { name: id, type: uuid, hidden: true }
+      - { name: title, label: عنوان درس, type: string, required: true }
+      - { name: summary, label: معرفی کوتاه, type: text }
+      - name: body
+        label: متن دری
+        type: rich-text
+        options: { format: markdown, media: false }
+  - name: chapters
+    label: فصل‌ها
+    type: collection
+    path: pages-content/cms/chapters
+    format: json
+    filename: "{id}.json"
+    view:
+      primary: title
+      search: [title]
+    fields:
+      - { name: id, type: uuid, hidden: true }
+      - { name: title, label: عنوان فصل, type: string, required: true }
+      - name: parent
+        label: درس مادر
+        type: reference
+        required: true
+        options: { collection: courses, value: "{path}", label: "{primary}" }
+      - { name: summary, label: معرفی کوتاه, type: text }
+      - name: body
+        label: متن دری
+        type: rich-text
+        options: { format: markdown, media: false }
+  - name: lessons
+    label: جلسه‌ها
+    type: collection
+    path: pages-content/cms/lessons
+    format: json
+    filename: "{id}.json"
+    view:
+      primary: title
+      search: [title]
+    fields:
+      - { name: id, type: uuid, hidden: true }
+      - { name: title, label: عنوان جلسه, type: string, required: true }
+      - name: parent
+        label: فصل مادر
+        type: reference
+        required: true
+        options: { collection: chapters, value: "{path}", label: "{primary}" }
+      - { name: summary, label: معرفی کوتاه, type: text }
+      - name: body
+        label: متن دری
+        type: rich-text
+        options: { format: markdown, media: false }
+      - { name: formula, label: فرمول LaTeX, type: string }
+      - { name: video, label: پیوند YouTube, type: string }
+      - { name: file, label: پیوند جزوه در Google Drive, type: string }
