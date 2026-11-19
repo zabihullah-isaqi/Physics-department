@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import {Pause, Play} from 'lucide-react';
 
 const topics = ['حرکت و نیرو','قانون‌های نیوتن','جاذبه و سقوط آزاد','کار و انرژی','حرکت پرتابی','موج و صوت','برق و مدار','مغناطیس','گرما و ترمودینامیک','نور و اپتیک'];
 
@@ -21,12 +22,15 @@ export function HomeMetrics({items, language}:{
     <div className="home-topic-band" lang="fa" data-paused={paused}>
       <div className="home-topic-window">
         <div className="home-topic-track">
-          {[0,1].map(copy=><ul key={copy} dir="rtl" aria-hidden={copy===1||undefined}>
+          {[0,1,2].map(copy=><ul key={copy} dir="rtl" aria-hidden={copy!==0||undefined}>
             {topics.map(topic=><li key={topic}>{topic}</li>)}
           </ul>)}
         </div>
       </div>
-      <button type="button" onClick={()=>setPaused(!paused)} lang={language}>{labels[paused?5:4]}</button>
+      <button type="button" onClick={()=>setPaused(!paused)} lang={language}
+        aria-label={labels[paused?5:4]} title={labels[paused?5:4]}>
+        {paused?<Play size={15} aria-hidden="true"/>:<Pause size={15} aria-hidden="true"/>}
+      </button>
     </div>
   </section>;
 }
