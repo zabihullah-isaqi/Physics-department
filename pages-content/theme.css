@@ -1,0 +1,78 @@
+.public-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #e8edf6;
+  --navy: #172a43;
+  --pale: #101926;
+  --line: #34455e;
+  --muted: #acbcd0;
+  --academy-blue: #9ac6ff;
+  --academy-soft: #22334d;
+  --academy-mint: #203b38;
+  --academy-cream: #403322;
+  --night-panel: #1b293e;
+  --night-raised: #253650;
+}
+
+html[data-theme="dark"] :is(body, .portfolio-page) {
+  background: var(--pale);
+  color: var(--ink);
+}
+
+html[data-theme="dark"] :is(.academy-header, .academy-topline, .science-notebook, .notebook-sticker,
+  .academy-empty, .content-card, .empty, .modal, .panel, .pf-nav, .pf-projects article,
+  .academy-search, .workbook-header, .translation-banner) {
+  background: var(--night-panel);
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+html[data-theme="dark"] :is(.academy-hero, .page-hero, .pf-hero, .pf-contact, .academy-lab-section) {
+  background: var(--navy);
+  color: var(--ink);
+}
+
+html[data-theme="dark"] :is(.academy-path, .path-icon, .notebook-tabs button, .notebook-caption>a,
+  .empty-book, .academy-empty>a, .lesson-navigation>a, .pill, .pf-interests span, .pf-signature) {
+  background: var(--night-raised);
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+html[data-theme="dark"] .academy-path.mint { background: var(--academy-mint); }
+html[data-theme="dark"] .academy-path.peach { background: var(--academy-cream); }
+
+html[data-theme="dark"] :is(.academy-header nav a, .academy-header .lang-button, .academy-intro,
+  .academy-path p, .path-link, .academy-empty p, .content-card p, .page-hero p, .empty h3,
+  .pf-breadcrumb, .pf-breadcrumb a, .pf-tagline, .pf-nav button, .pf-section-heading p,
+  .pf-timeline p, .pf-projects p, .pf-contact p) {
+  color: var(--muted);
+}
+
+html[data-theme="dark"] :is(.academy-header nav a.active, .academy-header nav a:hover,
+  .pf-nav button[aria-selected="true"], .pf-inline-link, .academy-text-link,
+  .academy-quiet-link, .card-bottom>a, .section-link, .text-link) {
+  color: var(--academy-blue);
+}
+
+html[data-theme="dark"] :is(.academy-button.primary, .academy-search button, .button.dark) {
+  background: var(--academy-blue);
+  color: #102239;
+}
+
+html[data-theme="dark"] :is(.button.light, input, select, textarea) {
+  background: var(--night-raised);
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+html[data-theme="dark"] .academy-header .public-theme-toggle { color: var(--gold); }
+.public-theme-toggle:focus-visible { outline: 2px solid var(--academy-blue); outline-offset: 3px; }

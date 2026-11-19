@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="درس‌های فزیک، لابراتوار و آثار علمی ذبیح‌الله اسحاقی">
+    <script>
+      (() => {
+        let saved;
+        try { saved = localStorage.getItem('isaqi-theme'); } catch {}
+        const manual = saved === 'dark' || saved === 'light';
+        document.documentElement.dataset.themePreference = manual ? 'manual' : 'system';
+        document.documentElement.dataset.theme = manual ? saved :
+          (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      })();
+    </script>
     <link rel="icon" href="%BASE_URL%favicon.svg">
     <title>ذبیح‌الله اسحاقی | خانهٔ علم و آموزش</title>
   </head>
