@@ -217,6 +217,17 @@ html[data-theme="dark"] .home-metric-grid dd { color: #8bd7c5; }
 .public-admin-preview .content-blocks { margin-block: 1rem; }
 .public-admin .blocks-editor { min-width: 0; }
 .public-admin .rich-editor { min-width: 0; }
+.latex-content { overflow-wrap: anywhere; }
+.latex-content :is(ul, ol) { padding-inline-start: 1.5rem; }
+.latex-content figure { margin-inline: 0; }
+.latex-content figure img { max-width: 100%; height: auto; }
+.latex-preview {
+  margin-block: .8rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: .5rem;
+  background: var(--academy-soft);
+}
 html[data-theme="dark"] .public-admin :is(.rich-editor, .rich-input, .rich-toolbar, .block-editor-card, .add-block-panel) {
   background: var(--night-panel);
   color: var(--ink);
