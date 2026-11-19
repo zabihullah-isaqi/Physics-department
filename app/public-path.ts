@@ -4,6 +4,7 @@ export function publicPageHref(base: string, path: string, language: string) {
   if (!match) return path;
   const [, pathname, suffix] = match;
   if (/^\/api(?:\/|$)/.test(pathname)) return path;
+  if (pathname === '/admin') return base + '/admin/' + suffix;
   const page = pathname === '/collaborate' ? '/contact' : pathname;
   const prefix = language === 'fa' ? '' : '/' + language;
   return base + prefix + page.replace(/\/$/, '') + '/' + suffix;

@@ -53,4 +53,6 @@ for (const [lang, dir] of [['fa', 'rtl'], ['ps', 'rtl'], ['en', 'ltr']]) {
   }
 }
 await writeFile(join(outDir, '404.html'), documentFor('/not-found', 'fa', 'rtl'));
+await mkdir(join(outDir, 'admin'), {recursive: true});
+await writeFile(join(outDir, 'admin', 'index.html'), documentFor('/admin', 'fa', 'rtl'));
 await writeFile(join(outDir, '.nojekyll'), '');

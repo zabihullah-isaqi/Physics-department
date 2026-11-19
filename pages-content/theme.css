@@ -76,3 +76,21 @@ html[data-theme="dark"] :is(.button.light, input, select, textarea) {
 
 html[data-theme="dark"] .academy-header .public-theme-toggle { color: var(--gold); }
 .public-theme-toggle:focus-visible { outline: 2px solid var(--academy-blue); outline-offset: 3px; }
+
+.public-admin-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 1.25rem;
+}
+
+.public-admin form, .public-admin label { display: grid; gap: .5rem; }
+.public-admin form { gap: 1rem; }
+.public-admin :is(input, select, textarea) { width: 100%; }
+.public-admin-actions { display: flex; flex-wrap: wrap; gap: .6rem; }
+.public-admin-publish { margin-block-start: 1rem; border-block-start: 1px solid var(--line); }
+.public-admin-publish details { margin-block-start: 1rem; }
+
+@media (max-width: 760px) {
+  .public-admin-layout { grid-template-columns: minmax(0, 1fr); }
+}
