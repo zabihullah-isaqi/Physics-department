@@ -77,13 +77,82 @@ html[data-theme="dark"] :is(.button.light, input, select, textarea) {
 html[data-theme="dark"] .academy-header .public-theme-toggle { color: var(--gold); }
 .public-theme-toggle:focus-visible { outline: 2px solid var(--academy-blue); outline-offset: 3px; }
 
+.home-metrics {
+  background: var(--academy-cream);
+  color: var(--ink);
+}
+
+.home-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  margin-block: 0;
+  padding-block: clamp(1.75rem,4vw,3rem);
+  text-align: center;
+  gap: 1rem;
+}
+
+.home-metric-grid>div { display: grid; gap: .3rem; }
+.home-metric-grid dt { color: var(--muted); font-size: .9rem; }
+.home-metric-grid dd { grid-row: 1; margin: 0; font-size: clamp(1.6rem,4vw,2.7rem); font-weight: 800; color: #176b63; }
+.home-topic-band { display: flex; align-items: center; border-block: 1px solid var(--line); background: var(--pale); }
+.home-topic-window { flex: 1; min-width: 0; overflow: hidden; direction: ltr; }
+.home-topic-track { display: flex; width: max-content; animation: roll-topics 36s linear infinite; }
+.home-topic-track ul {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 1.7rem;
+  min-width: 100vw;
+  list-style: none;
+  padding: .8rem .85rem;
+  margin: 0;
+}
+.home-topic-track li { display: flex; align-items: center; gap: 1rem; white-space: nowrap; color: var(--ink); }
+.home-topic-track li::before { content: ''; width: .35rem; height: .35rem; background: var(--gold); border-radius: 50%; }
+.home-topic-band:is(:hover,[data-paused="true"]) .home-topic-track { animation-play-state: paused; }
+.home-topic-band button {
+  border: 0;
+  border-inline-start: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  padding: .65rem .85rem;
+  flex-shrink: 0;
+  font-size: .8rem;
+}
+@keyframes roll-topics { to { transform: translateX(-50%); } }
+html[data-theme="dark"] .home-metric-grid dd { color: #8bd7c5; }
+
+@media (prefers-reduced-motion: reduce) {
+  .home-topic-track { animation: none; width: 100%; }
+  .home-topic-track ul { min-width: 0; width: 100%; flex-wrap: wrap; gap: .6rem 1rem; }
+  .home-topic-track ul[aria-hidden], .home-topic-band button { display: none; }
+}
+
+.public-admin-header { background: var(--academy-soft); padding-block: 1.6rem; border-bottom: 1px solid var(--line); }
+.public-admin-header h1 { margin-block: .6rem .15rem; }
+.public-admin-header p { margin: 0; color: var(--muted); }
 .public-admin-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  grid-template-columns: minmax(11rem, .28fr) minmax(0, 1fr);
   align-items: start;
   gap: 1.25rem;
 }
 
+.public-admin-work { min-width: 0; display: grid; gap: 1rem; }
+.public-admin-menu { padding: .35rem; display: grid; }
+.public-admin-menu a { display: flex; align-items: center; gap: .55rem; padding: .7rem; border-radius: .5rem; }
+.public-admin-menu a:first-child { background: var(--navy); color: white; }
+.public-admin-menu a:hover { background: var(--academy-soft); color: var(--ink); }
+.public-admin-row, .public-admin-list li { display: flex; justify-content: space-between; align-items: center; gap: .75rem; }
+.public-admin-row>h2 { margin: 0; }
+.public-admin :is(small, .public-admin-search) { color: var(--muted); }
+.public-admin-search { margin-block: 1rem; }
+.public-admin-search svg { vertical-align: middle; }
+.public-admin-list { margin: 0; padding: 0; list-style: none; }
+.public-admin-list li { border-top: 1px solid var(--line); padding-block: .65rem; }
+.public-admin-draft { display: grid; gap: .5rem; justify-items: start; background: var(--academy-soft); padding: 1rem; margin-block: .9rem; border-radius: .55rem; }
+.public-admin-preview-text { white-space: pre-wrap; }
+.public-admin fieldset { min-width: 0; display: grid; gap: .6rem; border: 1px solid var(--line); border-radius: .5rem; }
 .public-admin form, .public-admin label { display: grid; gap: .5rem; }
 .public-admin form { gap: 1rem; }
 .public-admin :is(input, select, textarea) { width: 100%; }
@@ -93,4 +162,7 @@ html[data-theme="dark"] .academy-header .public-theme-toggle { color: var(--gold
 
 @media (max-width: 760px) {
   .public-admin-layout { grid-template-columns: minmax(0, 1fr); }
+  .public-admin-menu { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .public-admin-menu a { padding: .5rem; gap: .25rem; font-size: .82rem; }
+  .home-metric-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
