@@ -188,9 +188,23 @@ html[data-theme="dark"] .home-metric-grid dd { color: #8bd7c5; }
 
 .public-admin-work { min-width: 0; display: grid; gap: 1rem; }
 .public-admin-menu { padding: .35rem; display: grid; }
-.public-admin-menu a { display: flex; align-items: center; gap: .55rem; padding: .7rem; border-radius: .5rem; }
-.public-admin-menu a:first-child { background: var(--navy); color: white; }
-.public-admin-menu a:hover { background: var(--academy-soft); color: var(--ink); }
+.public-admin-menu button {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  min-height: 2.75rem;
+  padding: .7rem;
+  border: 0;
+  border-radius: .5rem;
+  text-align: start;
+  background: transparent;
+  color: var(--ink);
+}
+.public-admin-menu button:hover { background: var(--academy-soft); }
+.public-admin-menu button[aria-current="true"] { background: var(--navy); color: white; }
+.public-admin [hidden] { display: none; }
+.public-admin-editor-tabs { margin-block: 1rem; }
+.public-admin-work>[role="status"]:empty { display: none; }
 .public-admin-row, .public-admin-list li { display: flex; justify-content: space-between; align-items: center; gap: .75rem; }
 .public-admin-row>h2 { margin: 0; }
 .public-admin :is(small, .public-admin-search) { color: var(--muted); }
@@ -218,7 +232,7 @@ html[data-theme="dark"] .public-admin :is(.rich-editor, .rich-input, .rich-toolb
 
 @media (max-width: 760px) {
   .public-admin-layout { grid-template-columns: minmax(0, 1fr); }
-  .public-admin-menu { grid-template-columns: repeat(3,minmax(0,1fr)); }
-  .public-admin-menu a { padding: .5rem; gap: .25rem; font-size: .82rem; }
+  .public-admin-menu { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .public-admin-menu button { padding: .5rem; gap: .25rem; font-size: .82rem; }
   .home-metric-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
