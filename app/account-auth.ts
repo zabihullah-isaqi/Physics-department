@@ -1,0 +1,9 @@
+import {headers} from 'next/headers';
+import {env} from 'cloudflare:workers';
+import {sourceHash} from './translation-model';
+export const SESSION_COOKIE='isaqi_session';
+export const randomToken=()=>Array.from(crypto.getRandomValues(new Uint8Array(32)),v=>v.toString(16).padStart(2,'0')).join('');
+export async function passwordHash(password:string,salt=randomToken().slice(0,32)){const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);const bits=await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:new TextEncoder().encode(salt),iterations:100000},key,256);return 'pbkdf2-sha256:100000:'+salt+':'+Array.from(new Uint8Array(bits),v=>v.toString(16).padStart(2,'0')).join('')}
+export async function verifyPassword(password:string,stored:string){const parts=stored.split(':');if(parts.length!==4||parts[0]!=='pbkdf2-sha256'||parts[1]!=='100000')return false;const candidate=await passwordHash(password,parts[2]);let difference=candidate.length^stored.length;for(let i=0;i<candidate.length;i++)difference|=candidate.charCodeAt(i)^(stored.charCodeAt(i)||0);return difference===0}
+export async function localAccount(){const h=await headers();const token=(h.get('cookie')||'').split(';').map(s=>s.trim()).find(s=>s.startsWith(SESSION_COOKIE+'='))?.slice(SESSION_COOKIE.length+1);if(!token||!/^\w{64}$/.test(token)||!env.DB)return null;return await env.DB.prepare("SELECT a.* FROM sessions s JOIN accounts a ON a.id=s.user_id WHERE s.id=? AND s.expires>? AND a.status='active'").bind(await sourceHash(token),new Date().toISOString()).first<any>()}
+export function sessionCookie(req:Request,token:string,maxAge=604800){return SESSION_COOKIE+'='+token+'; Path=/; HttpOnly; SameSite=Lax; Max-Age='+maxAge+(new URL(req.url).protocol==='https:'?'; Secure':'')}

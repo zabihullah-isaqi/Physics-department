@@ -1,0 +1,4 @@
+'use client';
+import {useMemo} from 'react';
+import katex from 'katex';
+export function MathFormula({tex,force=false}:{tex:string,force?:boolean}){const raw=String(tex||'').trim().replace(/^\$\$([\s\S]*)\$\$$/,'$1').replace(/^\\\[([\s\S]*)\\\]$/,'$1').trim();const result=useMemo(()=>{if(!raw)return {html:'',error:''};if(!force&&!/[\\_^{}]/.test(raw))return {html:'',error:''};try{return {html:katex.renderToString(raw,{displayMode:true,throwOnError:true,trust:false,strict:'ignore',maxExpand:500,maxSize:10,macros:{},output:'htmlAndMathml'}),error:''}}catch{return {html:'',error:'فرمول کامل یا معتبر نیست؛ دستور لاتک را بررسی کنید.'}}},[raw,force]);if(!raw)return null;return <div className="math-formula" dir="ltr">{result.html?<div dangerouslySetInnerHTML={{__html:result.html}}/>:<code>{raw}</code>}{result.error&&<p className="formula-error" dir="rtl">{result.error}</p>}</div>}

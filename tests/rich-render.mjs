@@ -1,0 +1,10 @@
+import {build} from 'esbuild';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {createElement} from 'react';
+import assert from 'node:assert/strict';
+import path from 'node:path';
+const outfile=path.resolve('.sites-runtime/qa/rich-view.mjs');
+await build({entryPoints:['app/rich-text.tsx'],outfile,bundle:true,format:'esm',platform:'node',jsx:'automatic',external:['react','react/jsx-runtime'],logLevel:'silent'});
+const {RichView}=await import(outfile);
+const value='@rich:v1:'+JSON.stringify([{tag:'p',style:{fontWeight:'bold',fontSize:'24px',textAlign:'justify'},children:[{text:'<script>escaped</script>'},{tag:'br',children:[]}]},{tag:'table',children:[{tag:'tbody',children:[{tag:'tr',children:[{tag:'td',children:[{tag:'br',children:[]}]}]}]}]},{tag:'formula',tex:'E_k = \\frac{1}{2}mv^2'},{tag:'script',children:[{text:'bad'}]}]);
+const html=renderToStaticMarkup(createElement(RichView,{value}));assert(html.includes('&lt;script&gt;'));assert(!html.includes('<script'));assert(html.includes('<br/>'));assert(html.includes('<table>'));assert(html.includes('font-size:24px'));assert(html.includes('katex'));console.log('PASS: rich-text SSR renders tables, line breaks, formatting and math safely.');
