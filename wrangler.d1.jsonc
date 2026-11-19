@@ -1,0 +1,12 @@
+{
+  "name": "isaqi-education",
+  "compatibility_date": "2026-05-15",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "isaqi-education",
+      "database_id": "0bc62cd5-9c40-4b62-b287-f57d5579ac86",
+      "migrations_dir": "drizzle"
+    }
+  ]
+}
