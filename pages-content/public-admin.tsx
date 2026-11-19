@@ -1,4 +1,5 @@
-import {useEffect, useState, type FormEvent} from 'react';
+import {useEffect, useRef, useState, type FormEvent} from 'react';
+import {publishCatalog} from './github-publish';
 import {publicPageHref} from '../app/public-path';
 import {BookOpen, Download, FileText, Globe, History, Pencil, Plus, Search} from 'lucide-react';
 import {RichTextEditor} from '../app/rich-text';
@@ -28,7 +29,9 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
   const [status,setStatus] = useState('');
   const [ready,setReady] = useState(false);
   const [dirty,setDirty] = useState(false);
-  const [copied,setCopied] = useState(false);
+  const [publishing,setPublishing] = useState(false);
+  const source = useRef('');
+  const tokenField = useRef<HTMLInputElement>(null);
   const [query,setQuery] = useState('');
   const [draft,setDraft] = useState<typeof empty|null>(null);
   const [preview,setPreview] = useState(false);
@@ -44,11 +47,12 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
     const controller = new AbortController();
     fetch(sourceUrl,{cache:'no-store',signal:controller.signal}).then(async response => {
       if (!response.ok) throw new Error('GitHub source unavailable');
-      const latest = await response.json();
+      const raw = await response.text();
+      const latest:unknown = JSON.parse(raw);
       if (!latest || typeof latest !== 'object' || !('content' in latest) || !Array.isArray(latest.content)) {
         throw new Error('Invalid catalog');
       }
-      if (!controller.signal.aborted) { setCatalog({...latest,content:latest.content}); setReady(true); }
+      if (!controller.signal.aborted) { source.current=raw; setCatalog({...latest,content:latest.content}); setReady(true); }
     }).catch(() => {
       if (!controller.signal.aborted) setStatus('فایل تازه از GitHub باز نشد. صفحه را دوباره بار کنید.');
     });
@@ -76,7 +80,7 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
   }
   function save(event:FormEvent) {
     event.preventDefault();
-    if (!ready) return;
+    if (!ready || publishing) return;
     const existing = catalog.content.find(item => item.id === form.id);
     const expected = parentKind[form.type];
     const parent = catalog.content.find(item => item.id === form.parent);
@@ -111,11 +115,30 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
       try { localStorage.removeItem(draftKey); } catch {}
     }
     setDirty(true);
-    setCopied(false);
-    setStatus('در فهرست آمادهٔ نشر شد. برای ثبت نهایی، فایل را به GitHub بفرستید.');
+    setStatus('محتوا آمادهٔ نشر است.');
     setView('publish');
   }
   const output = JSON.stringify(catalog,null,2)+'\n';
+  async function publish(event:FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!dirty || publishing || !tokenField.current) return;
+    const input = tokenField.current;
+    const token = input.value.trim();
+    input.value='';
+    setPublishing(true);
+    setStatus('در حال ثبت محتوا در GitHub…');
+    try {
+      await publishCatalog(token,source.current,output);
+      source.current=output;
+      setDirty(false);
+      setView('content');
+      setStatus('در GitHub ثبت شد. نسخهٔ عمومی پس از پایان ساخت خودکار به‌روز می‌شود.');
+    } catch (error) {
+      setStatus(error instanceof Error && !(error instanceof TypeError)?error.message:'ارتباط با GitHub برقرار نشد. محتوای آماده در پنل محفوظ است.');
+    } finally {
+      setPublishing(false);
+    }
+  }
   const expected = parentKind[form.type];
   const visible = catalog.content.filter(item=>(!kind||item.type===kind)&&item.title.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
   const media = catalog.content.flatMap(item=>{
@@ -137,7 +160,7 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
       <h1>میز کار آموزش</h1>
       <p>مدیریت محتوای آموزشی، پیش‌نمایش و نشر در GitHub</p>
     </div></header>
-    <div className="wrap section public-admin-layout">
+    <div className="wrap section public-admin-layout" aria-busy={publishing}>
       <nav className="panel public-admin-menu" aria-label="بخش‌های مدیریت">
         <button type="button" aria-current={view==='content'||view==='editor'?'true':undefined} onClick={()=>setView('content')}><BookOpen size={19}/>محتوای سایت</button>
         <button type="button" aria-current={view==='media'?'true':undefined} onClick={()=>setView('media')}><FileText size={19}/>فایل‌ها و ویدیو</button>
@@ -195,7 +218,7 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
           <label>پیوند جزوه یا اسلاید (Google Drive)<input type="url" dir="ltr" pattern="https://.+" value={form.file} onChange={e=>field('file',e.target.value)}/></label>
           </fieldset>
           <div className="public-admin-actions">
-            <button type="submit" className="button dark" disabled={!ready}>آماده‌کردن برای نشر</button>
+            <button type="submit" className="button dark" disabled={!ready||publishing}>آماده‌کردن برای نشر</button>
             <button type="button" className="button light" onClick={()=>{updateForm(form);setStatus('پیش‌نویس برای ادامهٔ ویرایش در همین مرورگر ذخیره شد.')}}>ذخیرهٔ پیش‌نویس</button>
           </div>
         </form>
@@ -216,19 +239,18 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
         <h2>آماده‌سازی و نشر</h2>
         {dirty&&<section className="public-admin-publish">
           <h2>نشر در GitHub</h2>
-          <ol>
-            <li>فایل آماده را کاپی کنید.</li>
-            <li>ویرایشگر GitHub را باز کنید، همهٔ متن قبلی را انتخاب و با متن کاپی‌شده جایگزین کنید.</li>
-            <li>روی <bdi>Commit changes</bdi> بزنید. پس از تأیید، GitHub سایت را به‌روز می‌کند.</li>
-          </ol>
-          <div className="public-admin-actions">
-            <button type="button" className="button dark" onClick={async()=>{
-              try { await navigator.clipboard.writeText(output); setCopied(true); }
-              catch { setStatus('کاپی خودکار ممکن نشد. فایل آماده را از گزینهٔ پایین کاپی کنید.'); }
-            }}>{copied?'کاپی شد':'کاپی فایل آماده'}</button>
-            <a className="button light" href={editUrl} target="_blank" rel="noreferrer">باز کردن ویرایشگر GitHub ↗</a>
-          </div>
-          <details><summary>دیدن فایل آماده</summary><textarea readOnly dir="ltr" rows={7} aria-label="فایل آمادهٔ نشر" value={output} onFocus={e=>e.target.select()}/></details>
+          <form onSubmit={publish}>
+            <label>کلید نشر GitHub<input ref={tokenField} type="password" required dir="ltr" autoComplete="off" spellCheck={false} disabled={publishing}/></label>
+            <div className="public-admin-actions">
+              <button type="submit" className="button dark" disabled={publishing}>{publishing?'در حال نشر…':'نشر در سایت'}</button>
+              <button type="button" className="button light" onClick={downloadBackup}>دریافت پشتیبان</button>
+            </div>
+          </form>
+          <details>
+            <summary>ساخت کلید نشر</summary>
+            <p>برای مخزن Physics-department یک کلید محدود با اجازهٔ <bdi>Contents: Read and write</bdi> بسازید. کلید فقط برای درخواست نشر به GitHub استفاده می‌شود.</p>
+            <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">ساخت کلید در GitHub ↗</a>
+          </details>
         </section>}
       </section>
       <section className="panel" hidden={view!=='media'}>
