@@ -25,8 +25,10 @@ export function PublicAdmin({initial,base}:{initial:Catalog;base:string}) {
     fetch(sourceUrl,{cache:'no-store',signal:controller.signal}).then(async response => {
       if (!response.ok) throw new Error('GitHub source unavailable');
       const latest = await response.json();
-      if (!Array.isArray(latest.content)) throw new Error('Invalid catalog');
-      if (!controller.signal.aborted) { setCatalog(latest); setReady(true); }
+      if (!latest || typeof latest !== 'object' || !('content' in latest) || !Array.isArray(latest.content)) {
+        throw new Error('Invalid catalog');
+      }
+      if (!controller.signal.aborted) { setCatalog({...latest,content:latest.content}); setReady(true); }
     }).catch(() => {
       if (!controller.signal.aborted) setStatus('فایل تازه از GitHub باز نشد. صفحه را دوباره بار کنید.');
     });
