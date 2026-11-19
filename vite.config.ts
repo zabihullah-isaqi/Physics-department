@@ -1,6 +1,6 @@
 import vinext from "vinext";
 import { defineConfig } from "vite";
-import hostingConfig from "./.openai/hosting.json";
+import { existsSync, readFileSync } from "node:fs";
 import { readExecutionProfile } from "./scripts/execution-profile.mjs";
 import { configureToolEnvironment } from "./scripts/tool-environment.mjs";
 import { sites } from "./scripts/vite/sites-vite-plugin";
@@ -9,7 +9,19 @@ import { connectorPreview } from "./scripts/vite/connector-preview-plugin.mjs";
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
   "00000000-0000-4000-8000-000000000000";
 
-const { d1, r2 } = hostingConfig;
+const hostingFile = new URL("./.openai/hosting.json", import.meta.url);
+const hostingConfig = existsSync(hostingFile)
+  ? JSON.parse(readFileSync(hostingFile, "utf8")) as { d1?: string; r2?: string }
+  : null;
+const standalone = hostingConfig ? null : JSON.parse(
+  readFileSync(new URL("./wrangler.d1.jsonc", import.meta.url), "utf8"),
+) as {
+  name: string;
+  compatibility_date: string;
+  d1_databases: Array<{ binding: string; database_name: string; database_id: string }>;
+};
+const d1 = hostingConfig ? hostingConfig.d1 : "DB";
+const r2 = hostingConfig?.r2;
 
 // macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
@@ -54,13 +66,23 @@ export default defineConfig(async ({ command }) => {
     },
     plugins: [
       vinext(),
-      sites({ mockAuth: !managedLinux }),
+      ...(hostingConfig || command === "serve"
+        ? [sites({ mockAuth: !managedLinux })]
+        : []),
       connectorPreview(),
       cloudflare({
         viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] },
         inspectorPort: false,
         config: {
           ...localBindingConfig,
+          ...(standalone && command === "build"
+            ? {
+                name: standalone.name,
+                compatibility_date: standalone.compatibility_date,
+                d1_databases: standalone.d1_databases,
+                vars: { ISAQI_STANDALONE: "1" },
+              }
+            : {}),
           ...(command === "serve"
             ? {
                 services: [
