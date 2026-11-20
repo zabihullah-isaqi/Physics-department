@@ -105,6 +105,112 @@ html[data-theme="dark"] .academy-header .public-theme-toggle { color: var(--gold
 
 .public-languages button:focus-visible { outline: 2px solid var(--academy-blue); outline-offset: 1px; }
 
+.library-hero {
+  --library-paper: #faf7f0;
+  --library-card: #f3eee3;
+  background: var(--library-paper);
+  padding-block: clamp(2.25rem,5vw,5rem);
+}
+
+.library-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1fr);
+  align-items: start;
+  gap: clamp(1.5rem,4vw,3.5rem);
+}
+
+.library-hero-grid[data-featured="true"] { grid-template-columns: minmax(0,1.9fr) minmax(16rem,1fr); }
+.library-search-area { min-width: 0; padding-block-start: .4rem; }
+.library-search-area h1 {
+  margin: 0;
+  font-size: clamp(2rem,4.4vw,4.1rem);
+  letter-spacing: -.025em;
+  line-height: 1.28;
+  color: var(--ink);
+}
+.library-intro { max-width: 56ch; color: var(--muted); margin-block: .9rem 1.5rem; }
+.library-search {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  min-width: 0;
+  padding: .35rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: .7rem;
+}
+.library-search:focus-within { outline: 2px solid var(--academy-blue); outline-offset: 2px; }
+.library-search input {
+  flex: 1;
+  min-width: 0;
+  padding: .65rem .55rem;
+  border: 0;
+  outline: 0;
+  background: transparent;
+}
+.library-search input:focus { outline: 0; }
+.library-search button {
+  display: grid;
+  place-items: center;
+  min-width: 3rem;
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: .5rem;
+  background: #205caf;
+  color: white;
+}
+.library-topics { margin-block-start: 1.8rem; }
+.library-topics h2 { margin: 0 0 .65rem; font-size: 1.25rem; }
+.library-topics ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(min(100%,12rem),1fr));
+  gap: 0 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-block-start: 1px solid var(--line);
+}
+.library-topics a {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr) auto;
+  align-items: center;
+  gap: .55rem;
+  padding: .7rem .2rem;
+  color: var(--ink);
+  border-block-end: 1px solid var(--line);
+}
+.library-topics a:hover { color: var(--academy-blue); }
+.library-topics a svg:first-child { color: var(--academy-blue); }
+.library-actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-block-start: 1.4rem; }
+.library-secondary { border: 1px solid var(--line); color: var(--ink); }
+.library-secondary:hover { border-color: var(--academy-blue); color: var(--academy-blue); }
+.library-feature { overflow: hidden; border-radius: .85rem; background: var(--library-card); }
+.library-feature>img { display: block; width: 100%; height: auto; aspect-ratio: 4/3; object-fit: cover; }
+.library-feature-copy { padding: clamp(1rem,3vw,2rem); }
+.library-feature-label {
+  display: inline-block;
+  border-radius: .35rem;
+  padding: .14rem .5rem;
+  background: #f8dfa2;
+  color: #142b50;
+  font-size: .82rem;
+  font-weight: 700;
+}
+.library-feature h2 { margin: .45rem 0; font-size: clamp(1.5rem,3vw,2.35rem); }
+.library-feature p { color: var(--muted); margin-block: 0 .85rem; }
+.library-feature a { display: inline-flex; align-items: center; gap: .4rem; color: var(--academy-blue); font-weight: 750; }
+[dir="ltr"] .library-hero :is(.library-topics a svg:last-child,.library-actions svg.lucide-arrow-left,.library-feature a svg:last-child) { transform: scaleX(-1); }
+html[data-theme="dark"] .library-hero { --library-paper: var(--pale); --library-card: var(--night-panel); }
+html[data-theme="dark"] .library-search { background: var(--night-panel); }
+html[data-theme="dark"] .library-search input { background: transparent; }
+
+@media (max-width: 760px) {
+  .library-hero-grid[data-featured="true"] { grid-template-columns: minmax(0,1fr); }
+  .library-feature:has(img) { display: grid; grid-template-columns: minmax(0,1fr) minmax(6rem,33%); align-items: center; }
+  .library-feature>img { grid-column: 2; grid-row: 1; }
+  .library-feature-copy { grid-column: 1; grid-row: 1; }
+}
+
 .home-metrics {
   background: var(--academy-cream);
   color: var(--ink);
