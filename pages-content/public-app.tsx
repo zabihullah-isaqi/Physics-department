@@ -1,5 +1,5 @@
 import Portal from '../app/portal';
-import {PublicAdmin} from './public-admin';
+import {PublicAdmin,type Catalog} from './public-admin';
 import content from './content.json';
 import fa from './fa.json';
 import ps from './ps.json';
@@ -12,6 +12,6 @@ const publicEdition = {
 };
 
 export function publicApp(path: string) {
-  if (path === '/admin') return <PublicAdmin initial={content} base={publicEdition.base}/>;
+  if (path === '/admin') return <PublicAdmin initial={content as unknown as Catalog} base={publicEdition.base}/>;
   return <Portal initialData={data} initialPath={path} publicEdition={publicEdition}/>;
 }

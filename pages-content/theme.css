@@ -228,6 +228,15 @@ html[data-theme="dark"] .home-metric-grid dd { color: #8bd7c5; }
   border-radius: .5rem;
   background: var(--academy-soft);
 }
+.lesson-experiment-frame {
+  display: block;
+  width: 100%;
+  min-height: 25rem;
+  margin-block-start: .75rem;
+  border: 1px solid var(--line);
+  border-radius: .5rem;
+  background: #fff;
+}
 html[data-theme="dark"] .public-admin :is(.rich-editor, .rich-input, .rich-toolbar, .block-editor-card, .add-block-panel) {
   background: var(--night-panel);
   color: var(--ink);

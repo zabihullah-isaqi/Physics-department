@@ -16,7 +16,7 @@ type Item = {
   id: string; type: Kind; title: string; summary: string; body: string;
   parent_id: string | null; category: string; status: 'published'; meta: string;
 };
-type Catalog = {content: Item[]; [key: string]: unknown};
+export type Catalog = {content: Item[]; [key: string]: unknown};
 const empty = {id:'',type:'course' as Kind,title:'',summary:'',body:'',parent:'',category:'',video:'',file:'',blocks:[] as ContentBlock[]};
 const parentKind: Partial<Record<Kind, Kind>> = {chapter:'course',lesson:'chapter'};
 const draftKey = 'isaqi-public-content-draft';
